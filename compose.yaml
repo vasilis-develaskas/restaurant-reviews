@@ -2,7 +2,7 @@ services:
   postgres:
     image: 'postgres:18'
     environment:
-      - 'POSTGRES_DB=restaraunt-reviews'
+      - 'POSTGRES_DB=restaurant-reviews'
       - 'POSTGRES_PASSWORD=password'
       - 'POSTGRES_USER=deve'
     ports:
