@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: restaurant-reviews
+  jpa:
+    hibernate:
+      dd1-auto: validate
+    open-in-view: false
