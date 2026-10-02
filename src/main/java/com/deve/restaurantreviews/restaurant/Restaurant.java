@@ -24,6 +24,7 @@ public class Restaurant {
     private Integer establishedYear;
     private int reviewCount;
     private long ratingSum;
+    private int ratingCount;
 
     @Version
     private Long version;
@@ -46,7 +47,7 @@ public class Restaurant {
     }
 
     public double getAverageRating() {
-        return reviewCount == 0 ? 0.0 : (double) ratingSum / reviewCount;
+        return ratingCount == 0 ? 0.0 : (double) ratingSum / ratingCount;
     }
 
     // -------------- Getters
@@ -97,6 +98,10 @@ public class Restaurant {
 
     public long getRatingSum() {
         return ratingSum;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
     }
 
     public Instant getCreatedAt() {

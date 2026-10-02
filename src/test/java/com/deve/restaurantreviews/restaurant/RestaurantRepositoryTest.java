@@ -38,6 +38,7 @@ public class RestaurantRepositoryTest {
         assertThat(loaded.getName()).isEqualTo("Trinity");
         assertThat(loaded.getDescription()).isEqualTo("Burgeradiko");
         assertThat(loaded.getPhone()).isNull();
+        assertThat(loaded.getRatingCount()).isZero();
         assertThat(loaded.getReviewCount()).isZero();
         assertThat(loaded.getAverageRating()).isZero();
         assertThat(loaded.getVersion()).isZero();
