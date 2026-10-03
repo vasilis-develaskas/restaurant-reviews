@@ -5,3 +5,8 @@ spring:
     hibernate:
       dd1-auto: validate
     open-in-view: false
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+        serialization-mode: via-dto
