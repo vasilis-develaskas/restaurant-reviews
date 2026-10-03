@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
 @Transactional
-public class RestaurantRepositoryTest {
+class RestaurantRepositoryTest {
 
     @Autowired
     private RestaurantRepository restaurantRepository;
@@ -27,7 +27,7 @@ public class RestaurantRepositoryTest {
     @Test
     void savesAndLoadsRestaurant() {
 
-        Restaurant restaurant = new Restaurant("Trinity", 2, "Mixail Ioannou 14", "Thessaloniki", "Kentro");
+        Restaurant restaurant = new Restaurant("Trinity", 2, "Navarinou", "Thessaloniki", "Kentro");
         restaurant.setDescription("Burgeradiko");
 
         Restaurant saved = restaurantRepository.saveAndFlush(restaurant);
@@ -50,7 +50,7 @@ public class RestaurantRepositoryTest {
     @Test
     void rejectsPriceRangeOutsideAllowedValues() {
 
-        Restaurant restaurant = new Restaurant("Trinity", 7, "Mixail Ioannou 14", "Thessaloniki", "Kentro");
+        Restaurant restaurant = new Restaurant("Trinity", 7, "Navarinou", "Thessaloniki", "Kentro");
 
         assertThatThrownBy(() -> restaurantRepository.saveAndFlush(restaurant)).isInstanceOf(DataIntegrityViolationException.class);
     }
