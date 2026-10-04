@@ -2,6 +2,7 @@ package com.deve.restaurantreviews.shared.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,5 +50,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Unexpected error", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred.");
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    ProblemDetail handleInvalidSortProperty(PropertyReferenceException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid sort property: " + ex.getPropertyName());
     }
 }

@@ -3,6 +3,7 @@ package com.deve.restaurantreviews.restaurant;
 import com.deve.restaurantreviews.restaurant.dto.RestaurantRequest;
 import com.deve.restaurantreviews.restaurant.dto.RestaurantResponse;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ class RestaurantController {
     }
 
     @GetMapping
-    Page<RestaurantResponse> list(Pageable pageable){
+    Page<RestaurantResponse> list(@ParameterObject Pageable pageable){
         return  restaurantService.list(pageable);
     }
 
