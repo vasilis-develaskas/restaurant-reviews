@@ -17,7 +17,7 @@ class JwtConfigTest {
     private static final String ISSUER = "restaurant-reviews";
 
     private final JwtConfig jwtConfig = new JwtConfig();
-    private final  JwtProperties properties = propertiesWithSecret(randomSecret());
+    private final JwtProperties properties = propertiesWithSecret(randomSecret());
     private final JwtEncoder encoder = jwtConfig.jwtEncoder(properties);
     private final JwtDecoder decoder = jwtConfig.jwtDecoder(properties);
 
