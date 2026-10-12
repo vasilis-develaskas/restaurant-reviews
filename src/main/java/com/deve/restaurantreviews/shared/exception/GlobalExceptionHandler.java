@@ -7,6 +7,7 @@ import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -32,9 +33,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, problemDetail, headers, status, request);
     }
 
+    // 401: Wrong credentials
+    @ExceptionHandler
+    ProblemDetail handleAuthenticationFailure(AuthenticationException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid username/email or password");
+    }
+
     // 404: Not Found
     @ExceptionHandler(NotFoundException.class)
-    ProblemDetail handleNotFound(NotFoundException ex){
+    ProblemDetail handleNotFound(NotFoundException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
