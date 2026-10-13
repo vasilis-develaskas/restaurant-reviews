@@ -1,6 +1,8 @@
 package com.deve.restaurantreviews.shared.security;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 
@@ -92,9 +94,45 @@ class JwtConfigTest {
         assertThatThrownBy(() -> decoder.decode(token)).isInstanceOf(JwtException.class);
     }
 
+    @Test
+    void convertTurnsRoleClaimIntoRoleAuthorityAndSubjectIntoName() {
 
-    private static JwtProperties propertiesWithSecret(String secret) {
-        return new JwtProperties(secret, Duration.ofHours(1), ISSUER);
+        //--Given
+        Jwt jwt = Jwt.withTokenValue("token-value")
+                .header("alg", "HS256")
+                .subject("5")
+                .claim("role", "USER")
+                .build();
+
+        //--When
+        AbstractAuthenticationToken authentication = jwtConfig.jwtAuthenticationConverter().convert(jwt);
+
+        //--Then
+        assertThat(authentication.getName()).isEqualTo("5");
+        assertThat(authentication.getAuthorities())
+                .extracting(GrantedAuthority::getAuthority)
+                .filteredOn(authority -> authority.startsWith("ROLE_"))
+                .containsExactly("ROLE_USER");
+    }
+
+    @Test
+    void converterTurnsAdminRoleIntoAdminAuthority() {
+
+        //--Given
+        Jwt jwt = Jwt.withTokenValue("token-value")
+                .header("alg", "HS256")
+                .subject("1")
+                .claim("role", "ADMIN")
+                .build();
+
+        //--When
+        AbstractAuthenticationToken authentication = jwtConfig.jwtAuthenticationConverter().convert(jwt);
+
+        //--Then
+        assertThat(authentication.getAuthorities())
+                .extracting(GrantedAuthority::getAuthority)
+                .filteredOn(authority -> authority.startsWith("ROLE_"))
+                .containsExactly("ROLE_ADMIn");
     }
 
     private static String randomSecret() {
@@ -113,5 +151,9 @@ class JwtConfigTest {
                 .expiresAt(expiresAt)
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+    }
+
+    private static JwtProperties propertiesWithSecret(String secret) {
+        return new JwtProperties(secret, Duration.ofHours(1), ISSUER);
     }
 }
