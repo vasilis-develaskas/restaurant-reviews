@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.*;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +38,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     ProblemDetail handleAuthenticationFailure(AuthenticationException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid username/email or password");
+    }
+
+    // 401: Wrong, expired access token
+    @ExceptionHandler
+    ResponseEntity<ProblemDetail> handleInvalidToken(OAuth2AuthenticationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "The access token is invalid or has expired.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE,"Bearer error=\"invalid_token\"").body(problemDetail);
     }
 
     // 404: Not Found

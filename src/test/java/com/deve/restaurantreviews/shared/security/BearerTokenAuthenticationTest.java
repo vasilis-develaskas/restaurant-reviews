@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -21,8 +22,7 @@ import java.util.Base64;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BearerTokenAuthenticationTest {
 
     private static final String OPEN_ENDPOINT = "/api/restaurants";
+
+    private static final String INVALID_TOKEN_MESSAGE = "The access token is invalid or has expired.";
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,30 +58,21 @@ class BearerTokenAuthenticationTest {
 
     @Test
     void tamperedTokenIsRejected() throws Exception {
-        String forged = withRoleChangedToAdmin(validToken());
+        expectInvalidTokenResponse(withRoleChangedToAdmin(validToken()));
 
-        mockMvc.perform(get(OPEN_ENDPOINT).header(HttpHeaders.AUTHORIZATION, "Bearer " + forged))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, containsString("invalid_token")));
-    }
+        }
 
     @Test
     void expiredTokenIsRejected() throws Exception {
         Instant now = Instant.now();
-        String expired = createToken(jwtProperties.issuer(), now.minus(Duration.ofHours(2)), now.minus(Duration.ofHours(1)));
+        expectInvalidTokenResponse(createToken(jwtProperties.issuer(), now.minus(Duration.ofHours(2)), now.minus(Duration.ofHours(1))));
 
-        mockMvc.perform(get(OPEN_ENDPOINT).header(HttpHeaders.AUTHORIZATION, "Bearer " + expired))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, containsString("invalid_token")));
-    }
+        }
 
     @Test
     void tokenFromAnotherIssuerIsRejected() throws Exception {
         Instant now = Instant.now();
-        String foreign = createToken("another-app", now, now.plus(Duration.ofHours(1)));
-
-        mockMvc.perform(get(OPEN_ENDPOINT).header(HttpHeaders.AUTHORIZATION, "Bearer " + foreign))
-                .andExpect(status().isUnauthorized());
+        expectInvalidTokenResponse(createToken("another-app", now, now.plus(Duration.ofHours(1))));
     }
 
     private String validToken() {
@@ -107,5 +100,14 @@ class BearerTokenAuthenticationTest {
                 + Base64.getUrlEncoder().withoutPadding().encodeToString(forgedPayload.getBytes(StandardCharsets.UTF_8))
                 + "." + parts[2];
 
+    }
+
+    private void expectInvalidTokenResponse(String token) throws Exception {
+        mockMvc.perform(get(OPEN_ENDPOINT).header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.WWW_AUTHENTICATE, containsString("invalid_token")))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value(INVALID_TOKEN_MESSAGE));
     }
 }
