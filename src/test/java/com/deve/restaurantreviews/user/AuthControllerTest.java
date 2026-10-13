@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,11 +23,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 public class AuthControllerTest {
 
-    @Autowired
-    private WebApplicationContext context;
 
     @Autowired
     private UserRepository userRepository;
@@ -37,11 +37,11 @@ public class AuthControllerTest {
     @Autowired
     private JwtDecoder jwtDecoder;
 
+    @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
         userRepository.deleteAll();
     }
 

@@ -1,10 +1,13 @@
 package com.deve.restaurantreviews.restaurant;
 
 import com.deve.restaurantreviews.TestcontainersConfiguration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 class RestaurantControllerTest {
 
@@ -37,22 +41,32 @@ class RestaurantControllerTest {
             }
             """;
 
-    @Autowired
-    private WebApplicationContext context;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
 
+    @Autowired
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp(){
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        restaurantRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
         restaurantRepository.deleteAll();
     }
 
     @Test
-    void createReturns201AndRestaurantCanBeRetrieved() throws Exception{
+    void responsesPassThroughSpringSecurityFilters() throws Exception {
+        mockMvc.perform(get("/api/restaurants"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Content-Type-Options","nosniff"));
+    }
+
+    @Test
+    void createReturns201AndRestaurantCanBeRetrieved() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/restaurants")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(VALID_REQUEST))
